@@ -27,6 +27,20 @@ A comprehensive Discord utility suite for fetching and analyzing guild data incl
 
 ## Installation
 
+### Option 1: Install from npm (Recommended)
+
+```bash
+npm install -g discord-guild-utils
+```
+
+After installation, you can use the `discord-guild-utils` command from anywhere:
+
+```bash
+discord-guild-utils roles
+```
+
+### Option 2: Install from source
+
 1. Clone the repository:
 
 ```bash
@@ -40,13 +54,49 @@ cd discord-guild-utils
 npm install
 ```
 
-3. (Optional) Create a `config.js` file from the template:
+3. Use npm scripts or run directly:
+
+```bash
+npm run roles
+# or
+node src/index.js roles
+```
+
+## Configuration
+
+You can provide your bot token and guild ID in several ways (in order of priority):
+
+### 1. Command Line Arguments (Highest Priority)
+
+```bash
+discord-guild-utils roles YOUR_BOT_TOKEN YOUR_GUILD_ID
+```
+
+### 2. Environment Variables
+
+```bash
+export DISCORD_BOT_TOKEN="your_bot_token"
+export DISCORD_GUILD_ID="your_guild_id"
+discord-guild-utils roles
+```
+
+Or on Windows:
+
+```cmd
+set DISCORD_BOT_TOKEN=your_bot_token
+set DISCORD_GUILD_ID=your_guild_id
+discord-guild-utils roles
+```
+
+### 3. Local config.js File
+
+Create a `config.js` file in your current directory:
 
 ```bash
 cp config.js.example config.js
 ```
 
-Then edit `config.js` and add your bot token and guild ID:
+Then edit `config.js`:
 
 ```javascript
 module.exports = {
@@ -55,51 +105,71 @@ module.exports = {
 };
 ```
 
+### 4. Global Config File
+
+Create a global configuration file that works from any directory:
+
+**Linux/macOS:**
+
+```bash
+mkdir -p ~/.discord-guild-utils
+cat > ~/.discord-guild-utils/config.js << EOF
+module.exports = {
+	botToken: 'YOUR_BOT_TOKEN_HERE',
+	guildId: 'YOUR_GUILD_ID_HERE',
+};
+EOF
+```
+
+**Windows:**
+
+```cmd
+mkdir %USERPROFILE%\.discord-guild-utils
+echo module.exports = { botToken: 'YOUR_BOT_TOKEN', guildId: 'YOUR_GUILD_ID' }; > %USERPROFILE%\.discord-guild-utils\config.js
+```
+
+**Note:** The `config.js` file is gitignored and will never be committed to your repository.
+
 ## Usage
 
 ### Command Line
 
-You can run commands directly with Node.js:
+If installed globally via npm:
 
 ```bash
 # Fetch roles
-node src/index.js roles <BOT_TOKEN> <GUILD_ID>
+discord-guild-utils roles [BOT_TOKEN] [GUILD_ID]
 
 # Fetch channels
-node src/index.js channels <BOT_TOKEN> <GUILD_ID>
+discord-guild-utils channels [BOT_TOKEN] [GUILD_ID]
 
 # Fetch members
-node src/index.js members <BOT_TOKEN> <GUILD_ID>
+discord-guild-utils members [BOT_TOKEN] [GUILD_ID]
 
 # Fetch emojis and stickers
-node src/index.js emojis <BOT_TOKEN> <GUILD_ID>
+discord-guild-utils emojis [BOT_TOKEN] [GUILD_ID]
 
 # Analyze permissions
-node src/index.js permissions <BOT_TOKEN> <GUILD_ID>
+discord-guild-utils permissions [BOT_TOKEN] [GUILD_ID]
 
 # Run all commands
-node src/index.js all <BOT_TOKEN> <GUILD_ID>
+discord-guild-utils all [BOT_TOKEN] [GUILD_ID]
 ```
 
-### NPM Scripts
-
-If you have a `config.js` file, you can use npm scripts:
+If installed from source:
 
 ```bash
-npm run roles
-npm run channels
-npm run members
-npm run emojis
-npm run permissions
-npm run all
+# Fetch roles
+node src/index.js roles [BOT_TOKEN] [GUILD_ID]
+
+# Or use npm scripts
+npm run roles [BOT_TOKEN] [GUILD_ID]
 ```
 
-### Using config.js
-
-If you've created a `config.js` file, you can omit the token and guild ID:
+**Note:** If you've configured bot token and guild ID via environment variables or config files, you can omit the arguments:
 
 ```bash
-node src/index.js roles
+discord-guild-utils roles
 ```
 
 ## Commands
@@ -119,7 +189,9 @@ Fetches and displays all roles from a guild.
 **Example:**
 
 ```bash
-node src/index.js roles YOUR_TOKEN YOUR_GUILD_ID
+discord-guild-utils roles YOUR_TOKEN YOUR_GUILD_ID
+# or if configured via env/config:
+discord-guild-utils roles
 ```
 
 ### Channels
@@ -139,7 +211,7 @@ Fetches and displays all channels and categories from a guild.
 **Example:**
 
 ```bash
-node src/index.js channels YOUR_TOKEN YOUR_GUILD_ID
+discord-guild-utils channels YOUR_TOKEN YOUR_GUILD_ID
 ```
 
 ### Members
@@ -159,7 +231,7 @@ Fetches and displays all members from a guild.
 **Example:**
 
 ```bash
-node src/index.js members YOUR_TOKEN YOUR_GUILD_ID
+discord-guild-utils members YOUR_TOKEN YOUR_GUILD_ID
 ```
 
 ### Emojis
@@ -179,7 +251,7 @@ Fetches and displays all emojis and stickers from a guild.
 **Example:**
 
 ```bash
-node src/index.js emojis YOUR_TOKEN YOUR_GUILD_ID
+discord-guild-utils emojis YOUR_TOKEN YOUR_GUILD_ID
 ```
 
 ### Permissions
@@ -198,7 +270,7 @@ Analyzes role permissions and hierarchy.
 **Example:**
 
 ```bash
-node src/index.js permissions YOUR_TOKEN YOUR_GUILD_ID
+discord-guild-utils permissions YOUR_TOKEN YOUR_GUILD_ID
 ```
 
 ## Output Formats
@@ -324,6 +396,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Verify your bot token is correct
 - Make sure you haven't accidentally exposed or reset your token
 - Check that the bot application is still active
+
+## Publishing
+
+This package is published to npm. To publish a new version:
+
+1. Update the version in `package.json`
+2. Commit your changes
+3. Create a git tag: `git tag v1.0.0`
+4. Push with tags: `git push origin main --tags`
+5. Publish to npm: `npm publish`
+
+**Note:** Make sure you're logged into npm (`npm login`) and have the necessary permissions.
 
 ## Support
 
