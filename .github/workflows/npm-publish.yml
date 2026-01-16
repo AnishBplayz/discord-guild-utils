@@ -1,4 +1,4 @@
-name: Publish to GitHub Packages
+name: Publish Package
 
 on:
   release:
@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -48,7 +50,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json
-          git commit -m "Bump version to ${{ github.event.inputs.version }}" || exit 0
+          git commit -m "chore: bump version to ${{ github.event.inputs.version }}" || exit 0
           git push || exit 0
 
       - name: Publish to GitHub Packages
@@ -62,3 +64,13 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           git tag "v${VERSION}"
           git push origin "v${VERSION}"
+
+      - name: Publish Summary
+        if: success()
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "## ✅ Published Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Package:** \`@anishbplayz/discord-guild-utils@${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**View package:** [GitHub Packages](https://github.com/AnishBplayz/discord-guild-utils/packages)" >> $GITHUB_STEP_SUMMARY
