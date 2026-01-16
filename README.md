@@ -1,7 +1,9 @@
 # discord-guild-utils
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D22.12.0-brightgreen.svg)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D22.12.0-brightgreen.svg)](https://nodejs.org/)
 [![discord.js](https://img.shields.io/badge/discord.js-v14.25.1%2B-blue.svg)](https://discord.js.org/)
+[![npm version](https://img.shields.io/npm/v/discord-guild-utils)](https://www.npmjs.com/package/discord-guild-utils)
 
 A comprehensive Discord utility suite for fetching and analyzing guild data including roles, channels, members, emojis, stickers, and permissions.
 
@@ -27,7 +29,19 @@ A comprehensive Discord utility suite for fetching and analyzing guild data incl
 
 ## Installation
 
-### Option 1: Install from GitHub Packages (Recommended)
+### Option 1: Install from npm (Recommended)
+
+```bash
+npm install -g discord-guild-utils
+```
+
+After installation, you can use the `discord-guild-utils` command from anywhere:
+
+```bash
+discord-guild-utils roles
+```
+
+### Option 2: Install from GitHub Packages
 
 ```bash
 # Configure npm to use GitHub Packages
@@ -40,13 +54,7 @@ npm install -g @anishbplayz/discord-guild-utils
 
 **Note:** You need a GitHub Personal Access Token with `read:packages` permission. Create one at [GitHub Settings](https://github.com/settings/tokens).
 
-After installation, you can use the `discord-guild-utils` command from anywhere:
-
-```bash
-discord-guild-utils roles
-```
-
-### Option 2: Install from source
+### Option 3: Install from source
 
 1. Clone the repository:
 
@@ -135,11 +143,25 @@ echo module.exports = { botToken: 'YOUR_BOT_TOKEN', guildId: 'YOUR_GUILD_ID' }; 
 
 **Note:** The `config.js` file is gitignored and will never be committed to your repository.
 
+## Quick Start
+
+1. **Install the package:**
+   ```bash
+   npm install -g discord-guild-utils
+   ```
+
+2. **Configure your bot token and guild ID** (see [Configuration](#configuration) section)
+
+3. **Run a command:**
+   ```bash
+   discord-guild-utils roles
+   ```
+
 ## Usage
 
 ### Command Line
 
-If installed globally via npm:
+If installed globally:
 
 ```bash
 # Fetch roles
@@ -384,7 +406,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-If you encounter any issues or have questions, please open an issue on GitHub.
+If you encounter any issues or have questions, please [open an issue](https://github.com/AnishBplayz/discord-guild-utils/issues) on GitHub.
+
+## Links
+
+- **npm Package**: [discord-guild-utils](https://www.npmjs.com/package/discord-guild-utils)
+- **GitHub Repository**: [AnishBplayz/discord-guild-utils](https://github.com/AnishBplayz/discord-guild-utils)
+- **Issues**: [Report a bug](https://github.com/AnishBplayz/discord-guild-utils/issues)
+- **Discord.js**: [Documentation](https://discord.js.org/)
 
 ## Acknowledgments
 
