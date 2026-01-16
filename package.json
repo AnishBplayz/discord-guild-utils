@@ -4,7 +4,7 @@
 	"description": "A comprehensive Discord utility suite for fetching and analyzing guild data (roles, channels, members, emojis, permissions)",
 	"main": "src/index.js",
 	"bin": {
-		"discord-guild-utils": "./src/index.js"
+		"discord-guild-utils": "src/index.js"
 	},
 	"type": "commonjs",
 	"engines": {
@@ -49,6 +49,10 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": ""
-	}
+		"url": "https://github.com/AnishBplayz/discord-guild-utils.git"
+	},
+	"bugs": {
+		"url": "https://github.com/AnishBplayz/discord-guild-utils/issues"
+	},
+	"homepage": "https://github.com/AnishBplayz/discord-guild-utils#readme"
 }
