@@ -1,0 +1,125 @@
+name: Auto Release on Version Bump
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'package.json'
+
+jobs:
+  detect-version-bump:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@anishbplayz'
+
+      - name: Get current version
+        id: current-version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION"
+
+      - name: Check if version changed
+        id: version-check
+        run: |
+          CURRENT_VERSION="${{ steps.current-version.outputs.version }}"
+          PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.0.0")
+          
+          echo "Previous version: $PREVIOUS_VERSION"
+          echo "Current version: $CURRENT_VERSION"
+          
+          if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "previous=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
+            echo "✅ Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "ℹ️  Version unchanged, skipping release"
+          fi
+
+      - name: Install dependencies
+        if: steps.version-check.outputs.changed == 'true'
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Validate package
+        if: steps.version-check.outputs.changed == 'true'
+        run: |
+          node -e "require('./package.json')"
+          node --check src/index.js
+
+      - name: Create Git Tag
+        if: steps.version-check.outputs.changed == 'true'
+        run: |
+          VERSION="${{ steps.current-version.outputs.version }}"
+          TAG="v${VERSION}"
+          
+          # Check if tag already exists
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "⚠️  Tag $TAG already exists, skipping tag creation"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" -m "Release $TAG"
+            git push origin "$TAG"
+            echo "✅ Created and pushed tag $TAG"
+          fi
+
+      - name: Create GitHub Release
+        if: steps.version-check.outputs.changed == 'true'
+        uses: ncipollo/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag: v${{ steps.current-version.outputs.version }}
+          name: Release v${{ steps.current-version.outputs.version }}
+          body: |
+            ## Changes in v${{ steps.current-version.outputs.version }}
+            
+            Automated release triggered by version bump in package.json.
+            
+            **Previous version:** ${{ steps.version-check.outputs.previous }}
+            **New version:** ${{ steps.current-version.outputs.version }}
+            
+            See [commit history](https://github.com/${{ github.repository }}/compare/v${{ steps.version-check.outputs.previous }}...v${{ steps.current-version.outputs.version }}) for details.
+          draft: false
+          prerelease: false
+
+      - name: Publish to GitHub Packages
+        if: steps.version-check.outputs.changed == 'true'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release Summary
+        if: steps.version-check.outputs.changed == 'true'
+        run: |
+          VERSION="${{ steps.current-version.outputs.version }}"
+          echo "## ✅ Auto-Release Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`v${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Package:** \`@anishbplayz/discord-guild-utils@${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**View:** [Release](https://github.com/${{ github.repository }}/releases/tag/v${VERSION}) | [Package](https://github.com/AnishBplayz/discord-guild-utils/packages)" >> $GITHUB_STEP_SUMMARY
