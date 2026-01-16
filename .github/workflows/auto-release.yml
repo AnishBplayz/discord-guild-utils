@@ -113,6 +113,22 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Publish to npm
+        if: steps.version-check.outputs.changed == 'true'
+        run: |
+          # Temporarily change package name for npm (unscoped)
+          npm pkg set name=discord-guild-utils
+          # Remove publishConfig to publish to npm
+          npm pkg delete publishConfig
+          # Publish to npm
+          npm publish --registry=https://registry.npmjs.org --access=public
+          # Restore original package name and publishConfig
+          npm pkg set name=@anishbplayz/discord-guild-utils
+          npm pkg set publishConfig.registry=https://npm.pkg.github.com
+          npm pkg set publishConfig.@anishbplayz:registry=https://npm.pkg.github.com
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Release Summary
         if: steps.version-check.outputs.changed == 'true'
         run: |
@@ -121,6 +137,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** \`v${VERSION}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Package:** \`@anishbplayz/discord-guild-utils@${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**GitHub Package:** \`@anishbplayz/discord-guild-utils@${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**npm Package:** \`discord-guild-utils@${VERSION}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**View:** [Release](https://github.com/${{ github.repository }}/releases/tag/v${VERSION}) | [Package](https://github.com/AnishBplayz/discord-guild-utils/packages)" >> $GITHUB_STEP_SUMMARY
+          echo "**View:** [Release](https://github.com/${{ github.repository }}/releases/tag/v${VERSION}) | [GitHub Package](https://github.com/AnishBplayz/discord-guild-utils/packages) | [npm Package](https://www.npmjs.com/package/discord-guild-utils)" >> $GITHUB_STEP_SUMMARY
