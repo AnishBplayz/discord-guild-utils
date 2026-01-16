@@ -5,6 +5,7 @@
 const { Events, ChannelType } = require('discord.js');
 const { createClient, validateInputs, setupErrorHandlers, connectClient, fetchGuild } = require('../utils/client');
 const { createSeparator, formatAsArray, formatAsCommaSeparated, formatAsObject, formatTableRow } = require('../utils/formatters');
+const { writeJSON } = require('../utils/fileWriter');
 
 /**
  * Gets the channel type name
@@ -131,6 +132,40 @@ async function fetchChannels(botToken, guildId) {
 					Object.entries(channelTypes).forEach(([type, count]) => {
 						console.log(`   ${type}: ${count}`);
 					});
+
+					// Save to file
+					const fileData = {
+						guild: {
+							id: guild.id,
+							name: guild.name,
+						},
+						categories: categories.map((cat) => ({
+							id: cat.id,
+							name: cat.name,
+							position: cat.position,
+							createdAt: cat.createdAt.toISOString(),
+						})),
+						channels: regularChannels.map((channel) => ({
+							id: channel.id,
+							name: channel.name,
+							type: getChannelTypeName(channel.type),
+							typeId: channel.type,
+							position: channel.position,
+							parentId: channel.parentId,
+							parentName: channel.parent ? channel.parent.name : null,
+							nsfw: channel.nsfw || false,
+							createdAt: channel.createdAt.toISOString(),
+						})),
+						statistics: {
+							total: channelsArray.length,
+							categories: categories.length,
+							regularChannels: regularChannels.length,
+							byType: channelTypes,
+						},
+					};
+
+					const filepath = writeJSON('channels', fileData, guild.id);
+					console.log(`\n💾 Output saved to: ${filepath}`);
 
 					console.log('\n✅ Done!');
 					resolve();

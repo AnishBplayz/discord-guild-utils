@@ -5,6 +5,7 @@
 const { Events } = require('discord.js');
 const { createClient, validateInputs, setupErrorHandlers, connectClient, fetchGuild } = require('../utils/client');
 const { createSeparator, formatAsArray, formatAsCommaSeparated, formatAsObject, formatTableRow } = require('../utils/formatters');
+const { writeJSON } = require('../utils/fileWriter');
 
 /**
  * Fetches and displays all roles from a guild
@@ -90,6 +91,35 @@ async function fetchRoles(botToken, guildId) {
 					if (managedRoles.length > 0) {
 						console.log(`ℹ️  Managed roles (${managedRoles.length}): ${managedRoles.map((r) => r.name).join(', ')}`);
 					}
+
+					// Save to file
+					const fileData = {
+						guild: {
+							id: guild.id,
+							name: guild.name,
+						},
+						roles: rolesArray.map((role) => ({
+							id: role.id,
+							name: role.name,
+							position: role.position,
+							color: role.hexColor,
+							managed: role.managed,
+							mentionable: role.mentionable,
+							hoist: role.hoist,
+							permissions: role.permissions.bitfield.toString(),
+							createdAt: role.createdAt.toISOString(),
+						})),
+						statistics: {
+							total: rolesArray.length,
+							everyoneRole: everyoneRole ? everyoneRole.id : null,
+							botRole: botRole ? { id: botRole.id, name: botRole.name } : null,
+							managedCount: managedRoles.length,
+							managedRoles: managedRoles.map((r) => ({ id: r.id, name: r.name })),
+						},
+					};
+
+					const filepath = writeJSON('roles', fileData, guild.id);
+					console.log(`\n💾 Output saved to: ${filepath}`);
 
 					console.log('\n✅ Done!');
 					resolve();

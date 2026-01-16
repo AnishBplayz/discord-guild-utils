@@ -43,6 +43,7 @@ Desktop.ini
 # Build artifacts
 dist/
 build/
+output/
 *.tsbuildinfo
 
 # Temporary files

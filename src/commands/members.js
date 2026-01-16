@@ -5,6 +5,7 @@
 const { Events } = require('discord.js');
 const { createClient, validateInputs, setupErrorHandlers, connectClient, fetchGuild } = require('../utils/client');
 const { createSeparator, formatAsArray, formatAsCommaSeparated, formatAsObject, formatTableRow } = require('../utils/formatters');
+const { writeJSON } = require('../utils/fileWriter');
 
 /**
  * Fetches and displays all members from a guild
@@ -114,6 +115,43 @@ async function fetchMembers(botToken, guildId) {
 						.forEach(([roleCount, memberCount]) => {
 							console.log(`   ${roleCount} role(s): ${memberCount} member(s)`);
 						});
+
+					// Save to file
+					const fileData = {
+						guild: {
+							id: guild.id,
+							name: guild.name,
+						},
+						members: membersArray.map((member) => ({
+							id: member.id,
+							username: member.user.username,
+							discriminator: member.user.discriminator,
+							tag: member.user.tag,
+							displayName: member.displayName,
+							bot: member.user.bot,
+							roles: member.roles.cache
+								.filter((role) => role.id !== guild.id)
+								.map((role) => ({
+									id: role.id,
+									name: role.name,
+								})),
+							roleCount: member.roles.cache.size - 1,
+							joinedAt: member.joinedAt ? member.joinedAt.toISOString() : null,
+							premiumSince: member.premiumSince ? member.premiumSince.toISOString() : null,
+							nickname: member.nickname,
+						})),
+						statistics: {
+							total: membersArray.length,
+							humans: humanMembers,
+							bots: botMembers,
+							withRoles: membersWithRoles,
+							withoutRoles: membersArray.length - membersWithRoles,
+							roleDistribution: Object.fromEntries(Object.entries(roleDistribution).map(([k, v]) => [parseInt(k), v])),
+						},
+					};
+
+					const filepath = writeJSON('members', fileData, guild.id);
+					console.log(`\n💾 Output saved to: ${filepath}`);
 
 					console.log('\n✅ Done!');
 					resolve();

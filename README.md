@@ -203,12 +203,48 @@ node src/index.js permissions YOUR_TOKEN YOUR_GUILD_ID
 
 ## Output Formats
 
-All commands provide output in multiple formats for easy copying:
+All commands provide output in multiple formats:
+
+### Console Output
 
 1. **Formatted Table**: Human-readable table format
 2. **JavaScript Array**: Ready to paste into your code
 3. **Comma-separated**: Simple list of IDs
 4. **JavaScript Object**: Object with names as keys and IDs as values
+
+### File Output
+
+All commands automatically save their output to JSON files organized by guild ID in the `output/` directory:
+
+- `output/[guildId]/roles.json` - Complete role data with metadata
+- `output/[guildId]/channels.json` - Channel and category information
+- `output/[guildId]/members.json` - Member data with roles and statistics
+- `output/[guildId]/emojis.json` - Emoji and sticker data
+- `output/[guildId]/permissions.json` - Permission analysis and role hierarchy
+
+**Example structure:**
+
+```
+output/
+├── 123456789012345678/
+│   ├── roles.json
+│   ├── channels.json
+│   ├── members.json
+│   ├── emojis.json
+│   └── permissions.json
+└── 987654321098765432/
+    ├── roles.json
+    └── channels.json
+```
+
+Each JSON file includes:
+
+- Timestamp of when the data was fetched
+- Guild information (ID and name)
+- Complete structured data
+- Statistics and analysis
+
+The `output/` directory and guild subdirectories are automatically created if they don't exist. The entire `output/` directory is gitignored by default.
 
 ## Configuration
 

@@ -5,6 +5,7 @@
 const { Events } = require('discord.js');
 const { createClient, validateInputs, setupErrorHandlers, connectClient, fetchGuild } = require('../utils/client');
 const { createSeparator, formatAsArray, formatAsCommaSeparated, formatAsObject, formatTableRow } = require('../utils/formatters');
+const { writeJSON } = require('../utils/fileWriter');
 
 /**
  * Fetches and displays all emojis and stickers from a guild
@@ -166,6 +167,55 @@ async function fetchEmojis(botToken, guildId) {
 					} else {
 						console.log('⚠️  No stickers found in this guild.\n');
 					}
+
+					// Save to file
+					const fileData = {
+						guild: {
+							id: guild.id,
+							name: guild.name,
+						},
+						emojis: emojisArray.map((emoji) => ({
+							id: emoji.id,
+							name: emoji.name,
+							animated: emoji.animated,
+							available: emoji.available,
+							managed: emoji.managed,
+							url: emoji.url,
+							identifier: emoji.identifier,
+							createdAt: emoji.createdAt ? emoji.createdAt.toISOString() : null,
+						})),
+						stickers: stickersArray.map((sticker) => ({
+							id: sticker.id,
+							name: sticker.name,
+							type: sticker.type === 1 ? 'Standard' : sticker.type === 2 ? 'Guild' : 'Unknown',
+							typeId: sticker.type,
+							available: sticker.available,
+							description: sticker.description || null,
+							format: sticker.format,
+							url: sticker.url,
+						})),
+						statistics: {
+							emojis: {
+								total: emojisArray.length,
+								animated: emojisArray.filter((e) => e.animated).length,
+								static: emojisArray.length - emojisArray.filter((e) => e.animated).length,
+								available: emojisArray.filter((e) => e.available).length,
+								unavailable: emojisArray.length - emojisArray.filter((e) => e.available).length,
+								managed: emojisArray.filter((e) => e.managed).length,
+								custom: emojisArray.length - emojisArray.filter((e) => e.managed).length,
+							},
+							stickers: {
+								total: stickersArray.length,
+								available: stickersArray.filter((s) => s.available).length,
+								unavailable: stickersArray.length - stickersArray.filter((s) => s.available).length,
+								guild: stickersArray.filter((s) => s.type === 2).length,
+								standard: stickersArray.length - stickersArray.filter((s) => s.type === 2).length,
+							},
+						},
+					};
+
+					const filepath = writeJSON('emojis', fileData, guild.id);
+					console.log(`\n💾 Output saved to: ${filepath}`);
 
 					console.log('✅ Done!');
 					resolve();

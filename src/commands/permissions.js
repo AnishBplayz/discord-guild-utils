@@ -5,6 +5,7 @@
 const { Events, PermissionFlagsBits } = require('discord.js');
 const { createClient, validateInputs, setupErrorHandlers, connectClient, fetchGuild } = require('../utils/client');
 const { createSeparator, formatTableRow } = require('../utils/formatters');
+const { writeJSON } = require('../utils/fileWriter');
 
 /**
  * Gets permission names from a permission bitfield
@@ -179,6 +180,7 @@ async function analyzePermissions(botToken, guildId) {
 					console.log('DETAILED PERMISSION BREAKDOWN:');
 					console.log(createSeparator(100));
 
+					const rolePermissions = [];
 					rolesArray.forEach((role) => {
 						if (role.id === guild.id) {
 							// Skip @everyone role
@@ -194,7 +196,50 @@ async function analyzePermissions(botToken, guildId) {
 								console.log(`   - ${perm}`);
 							});
 						}
+
+						rolePermissions.push({
+							id: role.id,
+							name: role.name,
+							position: role.position,
+							permissions: permissions,
+							permissionCount: permissions.length,
+							isAdministrator: role.permissions.has(PermissionFlagsBits.Administrator),
+							permissionBitfield: role.permissions.bitfield.toString(),
+						});
 					});
+
+					// Save to file
+					const permissionIssues = [];
+					rolesArray.forEach((role) => {
+						if (role.permissions.has(PermissionFlagsBits.ManageRoles)) {
+							const rolesAbove = rolesArray.filter((r) => r.position > role.position);
+							if (rolesAbove.length > 0) {
+								permissionIssues.push({
+									role: { id: role.id, name: role.name },
+									issue: 'Can manage roles above it',
+									rolesAbove: rolesAbove.map((r) => ({ id: r.id, name: r.name })),
+								});
+							}
+						}
+					});
+
+					const fileData = {
+						guild: {
+							id: guild.id,
+							name: guild.name,
+						},
+						roles: rolePermissions,
+						analysis: {
+							adminRoles: adminRoles.map((r) => ({ id: r.id, name: r.name })),
+							rolesWithManageRoles: rolesWithManageRoles.map((r) => ({ id: r.id, name: r.name })),
+							rolesWithKickMembers: rolesWithKickMembers.map((r) => ({ id: r.id, name: r.name })),
+							rolesWithBanMembers: rolesWithBanMembers.map((r) => ({ id: r.id, name: r.name })),
+						},
+						issues: permissionIssues,
+					};
+
+					const filepath = writeJSON('permissions', fileData, guild.id);
+					console.log(`\n💾 Output saved to: ${filepath}`);
 
 					console.log('\n✅ Done!');
 					resolve();
