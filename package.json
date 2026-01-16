@@ -1,0 +1,44 @@
+{
+	"name": "discord-guild-utils",
+	"version": "1.0.0",
+	"description": "A comprehensive Discord utility suite for fetching and analyzing guild data (roles, channels, members, emojis, permissions)",
+	"main": "src/index.js",
+	"type": "commonjs",
+	"engines": {
+		"node": ">=22.12.0"
+	},
+	"scripts": {
+		"start": "node src/index.js",
+		"roles": "node src/index.js roles",
+		"channels": "node src/index.js channels",
+		"members": "node src/index.js members",
+		"emojis": "node src/index.js emojis",
+		"permissions": "node src/index.js permissions",
+		"all": "node src/index.js all",
+		"format": "prettier . --write"
+	},
+	"keywords": [
+		"discord",
+		"discord.js",
+		"utility",
+		"guild",
+		"roles",
+		"channels",
+		"members",
+		"emojis",
+		"permissions"
+	],
+	"author": "",
+	"license": "MIT",
+	"private": true,
+	"dependencies": {
+		"discord.js": "^14.25.1"
+	},
+	"devDependencies": {
+		"prettier": "^3.8.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": ""
+	}
+}
