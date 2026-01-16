@@ -1,6 +1,6 @@
 {
-	"name": "discord-guild-utils",
-	"version": "1.0.0",
+	"name": "@anishbplayz/discord-guild-utils",
+	"version": "1.0.1",
 	"description": "A comprehensive Discord utility suite for fetching and analyzing guild data (roles, channels, members, emojis, permissions)",
 	"main": "src/index.js",
 	"bin": {
@@ -54,5 +54,9 @@
 	"bugs": {
 		"url": "https://github.com/AnishBplayz/discord-guild-utils/issues"
 	},
-	"homepage": "https://github.com/AnishBplayz/discord-guild-utils#readme"
+	"homepage": "https://github.com/AnishBplayz/discord-guild-utils#readme",
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com",
+		"@anishbplayz:registry": "https://npm.pkg.github.com"
+	}
 }

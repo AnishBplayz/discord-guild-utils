@@ -27,11 +27,18 @@ A comprehensive Discord utility suite for fetching and analyzing guild data incl
 
 ## Installation
 
-### Option 1: Install from npm (Recommended)
+### Option 1: Install from GitHub Packages (Recommended)
 
 ```bash
-npm install -g discord-guild-utils
+# Configure npm to use GitHub Packages
+echo "@anishbplayz:registry=https://npm.pkg.github.com" >> ~/.npmrc
+echo "//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN" >> ~/.npmrc
+
+# Install the package globally
+npm install -g @anishbplayz/discord-guild-utils
 ```
+
+**Note:** You need a GitHub Personal Access Token with `read:packages` permission. Create one at [GitHub Settings](https://github.com/settings/tokens).
 
 After installation, you can use the `discord-guild-utils` command from anywhere:
 
@@ -44,7 +51,7 @@ discord-guild-utils roles
 1. Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/AnishBplayz/discord-guild-utils.git
 cd discord-guild-utils
 ```
 
@@ -54,12 +61,10 @@ cd discord-guild-utils
 npm install
 ```
 
-3. Use npm scripts or run directly:
+3. Use npm scripts:
 
 ```bash
 npm run roles
-# or
-node src/index.js roles
 ```
 
 ## Configuration
@@ -345,25 +350,6 @@ Make sure your bot has the following intents enabled in the Discord Developer Po
 - Message Content Intent
 - Presence Intent (optional but recommended)
 
-## Project Structure
-
-```
-discord-guild-utils/
-├── src/
-│   ├── index.js              # Main CLI entry point
-│   ├── utils/
-│   │   ├── client.js         # Shared Discord client setup
-│   │   └── formatters.js     # Output formatting utilities
-│   └── commands/
-│       ├── roles.js          # Fetch roles
-│       ├── channels.js       # Fetch channels
-│       ├── members.js        # Fetch members
-│       ├── emojis.js         # Fetch emojis and stickers
-│       └── permissions.js   # Analyze permissions
-├── package.json
-├── config.js.example         # Configuration template
-└── README.md
-```
 
 ## Contributing
 
@@ -397,17 +383,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Make sure you haven't accidentally exposed or reset your token
 - Check that the bot application is still active
 
-## Publishing
-
-This package is published to npm. To publish a new version:
-
-1. Update the version in `package.json`
-2. Commit your changes
-3. Create a git tag: `git tag v1.0.0`
-4. Push with tags: `git push origin main --tags`
-5. Publish to npm: `npm publish`
-
-**Note:** Make sure you're logged into npm (`npm login`) and have the necessary permissions.
 
 ## Support
 
