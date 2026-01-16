@@ -113,6 +113,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Setup npm authentication
+        if: steps.version-check.outputs.changed == 'true'
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+          
       - name: Publish to npm
         if: steps.version-check.outputs.changed == 'true'
         run: |
@@ -126,8 +131,6 @@ jobs:
           npm pkg set name=@anishbplayz/discord-guild-utils
           npm pkg set publishConfig.registry=https://npm.pkg.github.com
           npm pkg set publishConfig.@anishbplayz:registry=https://npm.pkg.github.com
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Release Summary
         if: steps.version-check.outputs.changed == 'true'

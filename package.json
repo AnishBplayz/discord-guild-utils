@@ -1,6 +1,6 @@
 {
 	"name": "@anishbplayz/discord-guild-utils",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "A comprehensive Discord utility suite for fetching and analyzing guild data (roles, channels, members, emojis, permissions)",
 	"main": "src/index.js",
 	"bin": {
