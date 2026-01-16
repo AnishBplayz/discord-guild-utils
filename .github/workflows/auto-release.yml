@@ -1,150 +1,150 @@
 name: Auto Release on Version Bump
 
 on:
-  push:
-    branches:
-      - main
-      - master
-    paths:
-      - 'package.json'
+    push:
+        branches:
+            - main
+            - master
+        paths:
+            - 'package.json'
 
 jobs:
-  detect-version-bump:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      pull-requests: read
+    detect-version-bump:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            packages: write
+            pull-requests: read
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
-      - name: Setup Node.js for GitHub Packages
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.x'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@anishbplayz'
-          
-      - name: Setup Node.js for npm
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.x'
-          registry-url: 'https://registry.npmjs.org'
-          always-auth: true
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+            - name: Setup Node.js for GitHub Packages
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22.x'
+                  registry-url: 'https://npm.pkg.github.com'
+                  scope: '@anishbplayz'
 
-      - name: Get current version
-        id: current-version
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Current version: $VERSION"
+            - name: Setup Node.js for npm
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22.x'
+                  registry-url: 'https://registry.npmjs.org'
+                  always-auth: true
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Check if version changed
-        id: version-check
-        run: |
-          CURRENT_VERSION="${{ steps.current-version.outputs.version }}"
-          PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.0.0")
-          
-          echo "Previous version: $PREVIOUS_VERSION"
-          echo "Current version: $CURRENT_VERSION"
-          
-          if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "previous=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
-            echo "✅ Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION"
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "ℹ️  Version unchanged, skipping release"
-          fi
+            - name: Get current version
+              id: current-version
+              run: |
+                  VERSION=$(node -p "require('./package.json').version")
+                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+                  echo "Current version: $VERSION"
 
-      - name: Install dependencies
-        if: steps.version-check.outputs.changed == 'true'
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+            - name: Check if version changed
+              id: version-check
+              run: |
+                  CURRENT_VERSION="${{ steps.current-version.outputs.version }}"
+                  PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.0.0")
 
-      - name: Validate package
-        if: steps.version-check.outputs.changed == 'true'
-        run: |
-          node -e "require('./package.json')"
-          node --check src/index.js
+                  echo "Previous version: $PREVIOUS_VERSION"
+                  echo "Current version: $CURRENT_VERSION"
 
-      - name: Create Git Tag
-        if: steps.version-check.outputs.changed == 'true'
-        run: |
-          VERSION="${{ steps.current-version.outputs.version }}"
-          TAG="v${VERSION}"
-          
-          # Check if tag already exists
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "⚠️  Tag $TAG already exists, skipping tag creation"
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git tag -a "$TAG" -m "Release $TAG"
-            git push origin "$TAG"
-            echo "✅ Created and pushed tag $TAG"
-          fi
+                  if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+                    echo "changed=true" >> $GITHUB_OUTPUT
+                    echo "previous=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
+                    echo "✅ Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION"
+                  else
+                    echo "changed=false" >> $GITHUB_OUTPUT
+                    echo "ℹ️  Version unchanged, skipping release"
+                  fi
 
-      - name: Create GitHub Release
-        if: steps.version-check.outputs.changed == 'true'
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.current-version.outputs.version }}
-          release_name: Release v${{ steps.current-version.outputs.version }}
-          body: |
-            ## Changes in v${{ steps.current-version.outputs.version }}
-            
-            Automated release triggered by version bump in package.json.
-            
-            **Previous version:** ${{ steps.version-check.outputs.previous }}
-            **New version:** ${{ steps.current-version.outputs.version }}
-            
-            See [commit history](https://github.com/${{ github.repository }}/compare/v${{ steps.version-check.outputs.previous }}...v${{ steps.current-version.outputs.version }}) for details.
-          draft: false
-          prerelease: false
+            - name: Install dependencies
+              if: steps.version-check.outputs.changed == 'true'
+              run: |
+                  if [ -f package-lock.json ]; then
+                    npm ci
+                  else
+                    npm install
+                  fi
 
-      - name: Publish to GitHub Packages
-        if: steps.version-check.outputs.changed == 'true'
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Validate package
+              if: steps.version-check.outputs.changed == 'true'
+              run: |
+                  node -e "require('./package.json')"
+                  node --check src/index.js
 
-      - name: Publish to npm
-        if: steps.version-check.outputs.changed == 'true'
-        run: |
-          # Temporarily change package name for npm (unscoped)
-          npm pkg set name=discord-guild-utils
-          # Remove publishConfig to publish to npm
-          npm pkg delete publishConfig
-          # Publish to npm
-          npm publish --registry=https://registry.npmjs.org --access=public
-          # Restore original package name and publishConfig
-          npm pkg set name=@anishbplayz/discord-guild-utils
-          npm pkg set publishConfig.registry=https://npm.pkg.github.com
-          npm pkg set publishConfig.@anishbplayz:registry=https://npm.pkg.github.com
+            - name: Create Git Tag
+              if: steps.version-check.outputs.changed == 'true'
+              run: |
+                  VERSION="${{ steps.current-version.outputs.version }}"
+                  TAG="v${VERSION}"
 
-      - name: Release Summary
-        if: steps.version-check.outputs.changed == 'true'
-        run: |
-          VERSION="${{ steps.current-version.outputs.version }}"
-          echo "## ✅ Auto-Release Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** \`v${VERSION}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**GitHub Package:** \`@anishbplayz/discord-guild-utils@${VERSION}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**npm Package:** \`discord-guild-utils@${VERSION}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**View:** [Release](https://github.com/${{ github.repository }}/releases/tag/v${VERSION}) | [GitHub Package](https://github.com/AnishBplayz/discord-guild-utils/packages) | [npm Package](https://www.npmjs.com/package/discord-guild-utils)" >> $GITHUB_STEP_SUMMARY
+                  # Check if tag already exists
+                  if git rev-parse "$TAG" >/dev/null 2>&1; then
+                    echo "⚠️  Tag $TAG already exists, skipping tag creation"
+                  else
+                    git config user.name "github-actions[bot]"
+                    git config user.email "github-actions[bot]@users.noreply.github.com"
+                    git tag -a "$TAG" -m "Release $TAG"
+                    git push origin "$TAG"
+                    echo "✅ Created and pushed tag $TAG"
+                  fi
+
+            - name: Create GitHub Release
+              if: steps.version-check.outputs.changed == 'true'
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: v${{ steps.current-version.outputs.version }}
+                  release_name: Release v${{ steps.current-version.outputs.version }}
+                  body: |
+                      ## Changes in v${{ steps.current-version.outputs.version }}
+
+                      Automated release triggered by version bump in package.json.
+
+                      **Previous version:** ${{ steps.version-check.outputs.previous }}
+                      **New version:** ${{ steps.current-version.outputs.version }}
+
+                      See [commit history](https://github.com/${{ github.repository }}/compare/v${{ steps.version-check.outputs.previous }}...v${{ steps.current-version.outputs.version }}) for details.
+                  draft: false
+                  prerelease: false
+
+            - name: Publish to GitHub Packages
+              if: steps.version-check.outputs.changed == 'true'
+              run: npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Publish to npm
+              if: steps.version-check.outputs.changed == 'true'
+              run: |
+                  # Temporarily change package name for npm (unscoped)
+                  npm pkg set name=discord-guild-utils
+                  # Remove publishConfig to publish to npm
+                  npm pkg delete publishConfig
+                  # Publish to npm
+                  npm publish --registry=https://registry.npmjs.org --access=public
+                  # Restore original package name and publishConfig
+                  npm pkg set name=@anishbplayz/discord-guild-utils
+                  npm pkg set publishConfig.registry=https://npm.pkg.github.com
+                  npm pkg set publishConfig.@anishbplayz:registry=https://npm.pkg.github.com
+
+            - name: Release Summary
+              if: steps.version-check.outputs.changed == 'true'
+              run: |
+                  VERSION="${{ steps.current-version.outputs.version }}"
+                  echo "## ✅ Auto-Release Complete" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "**Version:** \`v${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "**GitHub Package:** \`@anishbplayz/discord-guild-utils@${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+                  echo "**npm Package:** \`discord-guild-utils@${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "**View:** [Release](https://github.com/${{ github.repository }}/releases/tag/v${VERSION}) | [GitHub Package](https://github.com/AnishBplayz/discord-guild-utils/packages) | [npm Package](https://www.npmjs.com/package/discord-guild-utils)" >> $GITHUB_STEP_SUMMARY

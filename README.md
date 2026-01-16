@@ -350,7 +350,6 @@ Make sure your bot has the following intents enabled in the Discord Developer Po
 - Message Content Intent
 - Presence Intent (optional but recommended)
 
-
 ## Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
@@ -382,7 +381,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Verify your bot token is correct
 - Make sure you haven't accidentally exposed or reset your token
 - Check that the bot application is still active
-
 
 ## Support
 
